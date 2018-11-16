@@ -1,0 +1,114 @@
+'''
+给定一个所有节点为非负值的二叉搜索树，求树中任意两节点的差的绝对值的最小值。
+
+示例 :
+
+输入:
+
+   1
+    \
+     3
+    /
+   2
+
+输出:
+1
+
+解释:
+最小绝对差为1，其中 2 和 1 的差的绝对值为 1（或者 2 和 3）。
+注意: 树中至少有2个节点。
+'''
+
+'''
+我的：0.64 时间复杂度O(nlogn) 空间复杂度O(n)
+    思路：利用bfs将树的所有结点值全部找出来存放到result中
+        然后对result排序
+        最后对result中相邻对两个元素相减，取最小对差
+'''
+
+#Definition for a binary tree node.
+class TreeNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+class Solution(object):
+    def getMinimumDifference(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        queue = [root]
+        result = [root.val]
+        while queue != []:
+            node = queue.pop()
+            if node.left:
+                queue.append(node.left)
+                result.append(node.left.val)
+            if node.right:
+                queue.append(node.right)
+                result.append(node.right.val)
+        result.sort()
+        diff = max(result) - min(result)
+        for i in range(1, len(result)):
+            diff = min(diff, result[i] - result[i - 1])
+        return diff
+
+'''
+另一种思路：0.65 时间复杂度O(logn) 空间复杂度O(n)
+思路：因为是二叉搜索树，root.left.val <= root.val <= root.right.val
+    所以，直接对树进行中序遍历就可以得到一个有序对数组，
+    然后对这个数组进行相邻位置相减，取最小对差
+'''
+class Solution(object):
+    def __init__(self):
+        self.allval = []
+    def getMinimumDifference(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        self.midsearch(root)
+        diff = max(self.allval)-min(self.allval)
+        for i in range(1, len(self.allval)):
+            diff = min(diff, self.allval[i]-self.allval[i-1])
+        return diff
+    def midsearch(self,root):
+        if root:
+            self.midsearch(root.left)
+            self.allval.append(root.val)
+            self.midsearch(root.right)
+
+'''
+第三种思路：时间复杂度O(logn) 空间复杂度O(1)
+思路：和第二种思路相同，利用中序遍历，不同的是，在遍历时就那两两相邻度元素进行相减，然后取最小的差
+    这里注意要构造前置元素pre
+'''
+
+class Solution(object):
+    def __init__(self):
+        self.diff = float('inf')
+        self.pre = float('-inf')
+    def getMinimumDifference(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        self.midsearch(root)
+        return self.diff
+
+    def midsearch(self,root):
+        if root:
+            self.midsearch(root.left)
+            self.diff = min(self.diff, abs(root.val-self.pre))
+            self.pre = root.val
+            self.midsearch(root.right)
+
+
+root = TreeNode(5)
+root.left = TreeNode(4)
+root.right = TreeNode(7)
+
+s = Solution()
+s.getMinimumDifference(root)
